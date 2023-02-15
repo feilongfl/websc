@@ -65,19 +65,33 @@ uint8_t VEN_read(void) {
 // ===================================================================================
 // VENDOR-Specific USB Handler Functions
 // ===================================================================================
+struct usb_vendor_webusb
+{
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bScheme;
+  uint8_t URL[sizeof(WEBUSB_URL)];
+} usb_vendor_webusb = {
+  .bLength = sizeof(usb_vendor_webusb),
+  .bDescriptorType = 3,
+  .bScheme = 1,
+  .URL = WEBUSB_URL,
+};
 
 // Handle vendor-specific non-standard control requests
 uint8_t VEN_control(void) {
+  uint8_t i;
   #ifdef WCID_VENDOR_CODE
   uint8_t len;
-  uint8_t i;
   #endif
+  uint8_t* usb_vendor_webusb_ptr = (uint8_t*)&usb_vendor_webusb;
 
   if((USB_setupBuf->bRequestType & USB_REQ_TYP_MASK) == USB_REQ_TYP_VENDOR) {
     switch(USB_setupBuf->bRequest) {
-      case VEN_REQ_BOOTLOADER:              // enter bootloader
-        VEN_BOOT_flag = 1;
-        return 0;
+      case VEN_REQ_WEBUSB_URL:
+        for (i = 0; i < sizeof(usb_vendor_webusb); i++)
+          EP0_buffer[i] = usb_vendor_webusb_ptr[i]; // transmit feature descr to host
+        return sizeof(usb_vendor_webusb);
       case VEN_REQ_BUZZER_ON:               // turn on buzzer
         VEN_BUZZER_flag = 1;
         return 0;

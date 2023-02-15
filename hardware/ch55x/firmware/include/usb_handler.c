@@ -69,6 +69,11 @@ void USB_EP0_SETUP(void) {
               len = sizeof(CfgDescr);             // descriptor length
               break;
 
+            case USB_DESCR_TYP_BOSD:            // Configuration Descriptor
+              pDescr = (uint8_t*)&BdoDescr;       // put descriptor into out buffer
+              len = sizeof(BdoDescr);             // descriptor length
+              break;
+
             case USB_DESCR_TYP_STRING:
               switch(USB_setupBuf->wValueL) {      // String Descriptor Index
                 case 0:   pDescr = USB_STR_DESCR_i0; break;

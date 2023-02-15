@@ -9,7 +9,8 @@
 void VEN_init(void);                                // setup USB vendor-specific device
 
 // Vendor class control requests
-#define VEN_REQ_BOOTLOADER  1                       // enter bootloader
+#define VEN_REQ_WEBUSB_URL  1                       // enter bootloader
+// #define VEN_REQ_BOOTLOADER  1                       // enter bootloader
 #define VEN_REQ_BUZZER_ON   2                       // turn on buzzer
 #define VEN_REQ_BUZZER_OFF  3                       // turn off buzzer
 #define VEN_REQ_I2C_START   4                       // set start condition on I2C bus

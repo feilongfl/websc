@@ -44,6 +44,13 @@ typedef USB_CFG_DESCR_HID __xdata *PXUSB_CFG_DESCR_HID;
 extern __code USB_DEV_DESCR DevDescr;
 extern __code USB_CFG_DESCR_HID CfgDescr;
 
+typedef struct _USB_BDO {
+  USB_BinaryDeviceObject_DESCR bdo;
+  USB_DeviceCapability_DESCR webusb;
+} USB_BDO, *PUSB_BDO;
+typedef USB_BDO __xdata *PXUSB_BDO;
+extern __code USB_BDO BdoDescr;
+
 // ===================================================================================
 // String Descriptors
 // ===================================================================================

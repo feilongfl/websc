@@ -10,7 +10,7 @@
 __code USB_DEV_DESCR DevDescr = {
   .bLength            = sizeof(DevDescr),       // size of the descriptor in bytes: 18
   .bDescriptorType    = USB_DESCR_TYP_DEVICE,   // device descriptor: 0x01
-  .bcdUSB             = 0x0200,                 // USB specification: USB 2.0
+  .bcdUSB             = 0x0250,                 // USB specification: USB 2.0
   .bDeviceClass       = 0,                      // interface will define class
   .bDeviceSubClass    = 0,                      // unused
   .bDeviceProtocol    = 0,                      // unused
@@ -73,6 +73,25 @@ __code USB_CFG_DESCR_HID CfgDescr = {
     .wMaxPacketSize     = EP1_SIZE,               // max packet size
     .bInterval          = 0                       // polling intervall (ignored for bulk)
   }
+};
+
+__code USB_BDO BdoDescr = {
+    .bdo = {
+      .bLength = sizeof(USB_BinaryDeviceObject_DESCR),
+      .bDescriptorType = USB_DESCR_TYP_BOSD,
+      .wTotalLength = sizeof(USB_BDO),
+      .bNumDeviceCaps = 1,
+    },
+    .webusb = {
+      .bLength = sizeof(USB_DeviceCapability_DESCR),
+      .bDescriptorType = USB_DESCR_TYP_DCD,
+      .bDevCapabilityType = 0x05,
+      .bReserved = 0,
+      .PlatformCapablityUUID = {0x38, 0xB6, 0x08, 0x34, 0xA9, 0x09, 0xA0, 0x47, 0x8B, 0xFD, 0xA0, 0x76, 0x88, 0x15, 0xB6, 0x65},
+      .bcdVersion = 0x0100,
+      .bVendorCode = 1,
+      .iLandingPage = 1,
+    }
 };
 
 // ===================================================================================

@@ -115,6 +115,8 @@
 #define USB_DESCR_TYP_SPEED     0x07
 #define USB_DESCR_TYP_OTG       0x09
 #define USB_DESCR_TYP_IAD       0x0B
+#define USB_DESCR_TYP_BOSD      0x0F
+#define USB_DESCR_TYP_DCD       0x10
 #define USB_DESCR_TYP_HID       0x21
 #define USB_DESCR_TYP_REPORT    0x22
 #define USB_DESCR_TYP_PHYSIC    0x23
@@ -252,6 +254,26 @@ typedef struct _USB_ITF_ASS_DESCR {
     uint8_t  iFunction;
 } USB_IAD_DESCR, *PUSB_IAD_DESCR;
 typedef USB_IAD_DESCR __xdata *PXUSB_IAD_DESCR;
+
+typedef struct _USB_BinaryDeviceObject_DESCR {
+    uint8_t  bLength;
+    uint8_t  bDescriptorType;
+    uint16_t wTotalLength;
+    uint8_t  bNumDeviceCaps;
+} USB_BinaryDeviceObject_DESCR, *PUSB_BinaryDeviceObject_DESCR;
+typedef USB_BinaryDeviceObject_DESCR __xdata *PXUSB_BinaryDeviceObject_DESCR;
+
+typedef struct _USB_DeviceCapability_DESCR {
+    uint8_t  bLength;
+    uint8_t  bDescriptorType;
+    uint8_t  bDevCapabilityType;
+    uint8_t  bReserved;
+    uint8_t  PlatformCapablityUUID[16];
+    uint16_t bcdVersion;
+    uint8_t  bVendorCode;
+    uint8_t  iLandingPage;
+} USB_DeviceCapability_DESCR, *PUSB_DeviceCapability_DESCR;
+typedef USB_DeviceCapability_DESCR __xdata *PXUSB_DeviceCapability_DESCR;
 
 typedef struct _USB_ENDPOINT_DESCR {
     uint8_t  bLength;
