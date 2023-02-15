@@ -88,8 +88,11 @@ uint8_t VEN_control(void) {
   if((USB_setupBuf->bRequestType & USB_REQ_TYP_MASK) == USB_REQ_TYP_VENDOR) {
     switch(USB_setupBuf->bRequest) {
       case VEN_REQ_WEBUSB_URL:
-        ptr = (uint8_t*)&usb_vendor_webusb;
-        len = sizeof(usb_vendor_webusb);
+        // Get URL request
+        if (USB_setupBuf->wIndexL == 0x02) {
+          ptr = (uint8_t*)&usb_vendor_webusb;
+          len = sizeof(usb_vendor_webusb);
+        }
         break;
 
 #ifdef WCID_VENDOR_CODE
