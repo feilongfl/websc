@@ -275,6 +275,19 @@ typedef struct _USB_DeviceCapability_DESCR {
 } USB_DeviceCapability_DESCR, *PUSB_DeviceCapability_DESCR;
 typedef USB_DeviceCapability_DESCR __xdata *PXUSB_DeviceCapability_DESCR;
 
+typedef struct _USB_MSOS2_DESCR {
+    uint8_t  bLength;
+    uint8_t  bDescriptorType;
+    uint8_t  bDevCapabilityType;
+    uint8_t  bReserved;
+    uint8_t  PlatformCapablityUUID[16];
+    uint16_t dwWindowsVersion;
+    uint16_t wMSOSDescriptorSetTotalLength;
+    uint8_t  bMS_VendorCode;
+    uint8_t  bAltEnumCode;
+} USB_MSOS2_DESCR, *PUSB_MSOS2_DESCR;
+typedef USB_MSOS2_DESCR __xdata *PXUSB_MSOS2_DESCR;
+
 typedef struct _USB_ENDPOINT_DESCR {
     uint8_t  bLength;
     uint8_t  bDescriptorType;

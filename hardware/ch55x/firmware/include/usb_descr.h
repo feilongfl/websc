@@ -44,13 +44,27 @@ typedef USB_CFG_DESCR_HID __xdata *PXUSB_CFG_DESCR_HID;
 extern __code USB_DEV_DESCR DevDescr;
 extern __code USB_CFG_DESCR_HID CfgDescr;
 
+struct usb_vendor_webusb
+{
+  uint8_t bLength;
+  uint8_t bDescriptorType;
+  uint8_t bScheme;
+  uint8_t URL[sizeof(WEBUSB_URL)];
+};
+extern struct usb_vendor_webusb usb_vendor_webusb;
+
 typedef struct _USB_BDO {
   USB_BinaryDeviceObject_DESCR bdo;
   USB_DeviceCapability_DESCR webusb;
+  USB_MSOS2_DESCR msos2;
 } USB_BDO, *PUSB_BDO;
 typedef USB_BDO __xdata *PXUSB_BDO;
 extern __code USB_BDO BdoDescr;
 
+extern __code uint8_t msos2_descriptor[];
+extern __code uint8_t msos2_descriptor_size;
+extern __code uint8_t msos1_compatid_descriptor[];
+extern __code uint8_t msos1_compatid_descriptor_size;
 // ===================================================================================
 // String Descriptors
 // ===================================================================================

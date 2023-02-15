@@ -75,6 +75,58 @@ __code USB_CFG_DESCR_HID CfgDescr = {
   }
 };
 
+__code struct usb_vendor_webusb usb_vendor_webusb = {
+  .bLength = sizeof(usb_vendor_webusb),
+  .bDescriptorType = 3,
+  .bScheme = 1,
+  .URL = WEBUSB_URL,
+};
+
+__code uint8_t msos2_descriptor[] = {
+	/* MS OS 2.0 set header descriptor   */
+	0x0A, 0x00,             /* Descriptor size (10 bytes)                 */
+	0x00, 0x00,             /* MS_OS_20_SET_HEADER_DESCRIPTOR             */
+	0x00, 0x00, 0x03, 0x06, /* Windows version (8.1) (0x06030000)         */
+	(0x0A + 0x14 + 0x08), 0x00, /* Length of the MS OS 2.0 descriptor set */
+
+	/* MS OS 2.0 function subset ID descriptor
+	 * This means that the descriptors below will only apply to one
+	 * set of interfaces
+	 */
+	0x08, 0x00, /* Descriptor size (8 bytes) */
+	0x02, 0x00, /* MS_OS_20_SUBSET_HEADER_FUNCTION */
+	0x02,       /* Index of first interface this subset applies to. */
+	0x00,       /* reserved */
+	(0x08 + 0x14), 0x00, /* Length of the MS OS 2.0 descriptor subset */
+
+	/* MS OS 2.0 compatible ID descriptor */
+	0x14, 0x00, /* Descriptor size                */
+	0x03, 0x00, /* MS_OS_20_FEATURE_COMPATIBLE_ID */
+	/* 8-byte compatible ID string, then 8-byte sub-compatible ID string */
+	'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+__code uint8_t msos2_descriptor_size = sizeof(msos2_descriptor);
+
+__code uint8_t msos1_compatid_descriptor[] = {
+	/* See https://github.com/pbatard/libwdi/wiki/WCID-Devices */
+	/* MS OS 1.0 header section */
+	0x28, 0x00, 0x00, 0x00, /* Descriptor size (40 bytes)          */
+	0x00, 0x01,             /* Version 1.00                        */
+	0x04, 0x00,             /* Type: Extended compat ID descriptor */
+	0x01,                   /* Number of function sections         */
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,       /* reserved    */
+
+	/* MS OS 1.0 function section */
+	0x02,     /* Index of interface this section applies to. */
+	0x01,     /* reserved */
+	/* 8-byte compatible ID string, then 8-byte sub-compatible ID string */
+	'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* reserved */
+};
+__code uint8_t msos1_compatid_descriptor_size = sizeof(msos1_compatid_descriptor);
+
 __code USB_BDO BdoDescr = {
     .bdo = {
       .bLength = sizeof(USB_BinaryDeviceObject_DESCR),
@@ -91,7 +143,27 @@ __code USB_BDO BdoDescr = {
       .bcdVersion = 0x0100,
       .bVendorCode = 1,
       .iLandingPage = 1,
-    }
+    },
+    .msos2 = {
+      .bLength = sizeof(USB_MSOS2_DESCR),
+      .bDevCapabilityType = 0x05,
+      .bReserved = 0,
+      .PlatformCapablityUUID = {
+        /**
+         * MS OS 2.0 Platform Capability ID
+         * D8DD60DF-4589-4CC7-9CD2-659D9E648A9F
+         */
+        0xDF, 0x60, 0xDD, 0xD8,
+        0x89, 0x45,
+        0xC7, 0x4C,
+        0x9C, 0xD2,
+        0x65, 0x9D, 0x9E, 0x64, 0x8A, 0x9F,
+      },
+      .dwWindowsVersion = 0x06030000,
+      .wMSOSDescriptorSetTotalLength = sizeof(msos2_descriptor),
+      .bMS_VendorCode = 0x02,
+      .bAltEnumCode = 0x00
+    },
 };
 
 // ===================================================================================
