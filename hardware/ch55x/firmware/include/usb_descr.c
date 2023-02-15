@@ -132,7 +132,7 @@ __code USB_BDO BdoDescr = {
       .bLength = sizeof(USB_BinaryDeviceObject_DESCR),
       .bDescriptorType = USB_DESCR_TYP_BOSD,
       .wTotalLength = sizeof(USB_BDO),
-      .bNumDeviceCaps = 1,
+      .bNumDeviceCaps = 2,
     },
     .webusb = {
       .bLength = sizeof(USB_DeviceCapability_DESCR),
@@ -146,6 +146,7 @@ __code USB_BDO BdoDescr = {
     },
     .msos2 = {
       .bLength = sizeof(USB_MSOS2_DESCR),
+      .bDescriptorType = USB_DESCR_TYP_DCD,
       .bDevCapabilityType = 0x05,
       .bReserved = 0,
       .PlatformCapablityUUID = {

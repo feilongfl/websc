@@ -68,7 +68,7 @@ uint8_t VEN_read(void) {
 // Handle vendor-specific non-standard control requests
 uint8_t VEN_control(void) {
   uint8_t i;
-  uint8_t* ptr;
+  uint8_t* ptr = 0;
   uint8_t len = 0xFF;
   uint8_t* usb_vendor_webusb_ptr = (uint8_t*)&usb_vendor_webusb;
 
@@ -103,7 +103,7 @@ uint8_t VEN_control(void) {
     }
   }
 
-  if (len != 0xFF) {
+  if (len != 0xFF && ptr != 0) {
       for (i = 0; i < len; i++)
           EP0_buffer[i] = ptr[i];
   }

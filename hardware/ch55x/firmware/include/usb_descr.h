@@ -51,7 +51,7 @@ struct usb_vendor_webusb
   uint8_t bScheme;
   uint8_t URL[sizeof(WEBUSB_URL)];
 };
-extern struct usb_vendor_webusb usb_vendor_webusb;
+extern __code struct usb_vendor_webusb usb_vendor_webusb;
 
 typedef struct _USB_BDO {
   USB_BinaryDeviceObject_DESCR bdo;

@@ -281,7 +281,7 @@ typedef struct _USB_MSOS2_DESCR {
     uint8_t  bDevCapabilityType;
     uint8_t  bReserved;
     uint8_t  PlatformCapablityUUID[16];
-    uint16_t dwWindowsVersion;
+    uint32_t dwWindowsVersion;
     uint16_t wMSOSDescriptorSetTotalLength;
     uint8_t  bMS_VendorCode;
     uint8_t  bAltEnumCode;
