@@ -78,6 +78,49 @@ struct usb_vendor_webusb
   .URL = WEBUSB_URL,
 };
 
+__code uint8_t msos2_descriptor[] = {
+	/* MS OS 2.0 set header descriptor   */
+	0x0A, 0x00,             /* Descriptor size (10 bytes)                 */
+	0x00, 0x00,             /* MS_OS_20_SET_HEADER_DESCRIPTOR             */
+	0x00, 0x00, 0x03, 0x06, /* Windows version (8.1) (0x06030000)         */
+	(0x0A + 0x14 + 0x08), 0x00, /* Length of the MS OS 2.0 descriptor set */
+
+	/* MS OS 2.0 function subset ID descriptor
+	 * This means that the descriptors below will only apply to one
+	 * set of interfaces
+	 */
+	0x08, 0x00, /* Descriptor size (8 bytes) */
+	0x02, 0x00, /* MS_OS_20_SUBSET_HEADER_FUNCTION */
+	0x02,       /* Index of first interface this subset applies to. */
+	0x00,       /* reserved */
+	(0x08 + 0x14), 0x00, /* Length of the MS OS 2.0 descriptor subset */
+
+	/* MS OS 2.0 compatible ID descriptor */
+	0x14, 0x00, /* Descriptor size                */
+	0x03, 0x00, /* MS_OS_20_FEATURE_COMPATIBLE_ID */
+	/* 8-byte compatible ID string, then 8-byte sub-compatible ID string */
+	'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+__code uint8_t msos1_compatid_descriptor[] = {
+	/* See https://github.com/pbatard/libwdi/wiki/WCID-Devices */
+	/* MS OS 1.0 header section */
+	0x28, 0x00, 0x00, 0x00, /* Descriptor size (40 bytes)          */
+	0x00, 0x01,             /* Version 1.00                        */
+	0x04, 0x00,             /* Type: Extended compat ID descriptor */
+	0x01,                   /* Number of function sections         */
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,       /* reserved    */
+
+	/* MS OS 1.0 function section */
+	0x02,     /* Index of interface this section applies to. */
+	0x01,     /* reserved */
+	/* 8-byte compatible ID string, then 8-byte sub-compatible ID string */
+	'W',  'I',  'N',  'U',  'S',  'B',  0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00 /* reserved */
+};
+
 // Handle vendor-specific non-standard control requests
 uint8_t VEN_control(void) {
   uint8_t i;
@@ -95,14 +138,21 @@ uint8_t VEN_control(void) {
         }
         break;
 
-#ifdef WCID_VENDOR_CODE
-      case WCID_VENDOR_CODE:
-        if (USB_setupBuf->wIndexL == 0x04) {
-          len = WCID_FEATURE_DESCR[0];
-          ptr = WCID_FEATURE_DESCR;
+      case VEN_REQ_MS2_DESC:
+        // MS_OS_20_DESCRIPTOR_INDEX
+        if (USB_setupBuf->wIndexL == 0x07) {
+          ptr = (uint8_t*)&msos2_descriptor;
+          len = sizeof(msos2_descriptor);
         }
         break;
-#endif // WCID_VENDOR_CODE
+
+      case VEN_REQ_MS1_DESC:
+        // Extended compat ID
+        if (USB_setupBuf->wIndexL == 0x04) {
+          ptr = (uint8_t*)&msos1_compatid_descriptor;
+          len = sizeof(msos1_compatid_descriptor);
+        }
+        break;
 
       default:
         break;                        // command not supported
@@ -113,6 +163,7 @@ uint8_t VEN_control(void) {
       for (i = 0; i < len; i++)
           EP0_buffer[i] = ptr[i];
   }
+  return len;
 }
 
 // Setup endpoints
