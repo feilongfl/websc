@@ -81,46 +81,35 @@ struct usb_vendor_webusb
 // Handle vendor-specific non-standard control requests
 uint8_t VEN_control(void) {
   uint8_t i;
-  #ifdef WCID_VENDOR_CODE
-  uint8_t len;
-  #endif
+  uint8_t* ptr;
+  uint8_t len = 0xFF;
   uint8_t* usb_vendor_webusb_ptr = (uint8_t*)&usb_vendor_webusb;
 
   if((USB_setupBuf->bRequestType & USB_REQ_TYP_MASK) == USB_REQ_TYP_VENDOR) {
     switch(USB_setupBuf->bRequest) {
       case VEN_REQ_WEBUSB_URL:
-        for (i = 0; i < sizeof(usb_vendor_webusb); i++)
-          EP0_buffer[i] = usb_vendor_webusb_ptr[i]; // transmit feature descr to host
-        return sizeof(usb_vendor_webusb);
-      case VEN_REQ_BUZZER_ON:               // turn on buzzer
-        VEN_BUZZER_flag = 1;
-        return 0;
-      case VEN_REQ_BUZZER_OFF:              // turn off buzzer
-        VEN_BUZZER_flag = 0;
-        return 0;
-      case VEN_REQ_I2C_START:               // set start condition on I2C bus
-        VEN_I2C_flag = 1;
-        return 0;
-      case VEN_REQ_I2C_STOP:                // set stop condition on I2C bus
-        VEN_I2C_flag = 0;
-        return 0;
+        ptr = (uint8_t*)&usb_vendor_webusb;
+        len = sizeof(usb_vendor_webusb);
+        break;
 
-      #ifdef WCID_VENDOR_CODE
+#ifdef WCID_VENDOR_CODE
       case WCID_VENDOR_CODE:
-        len = WCID_FEATURE_DESCR[0];
-        if(USB_setupBuf->wIndexL == 0x04) {
-          for(i=0; i<len; i++)
-            EP0_buffer[i] = WCID_FEATURE_DESCR[i];  // transmit feature descr to host
-          return len;
+        if (USB_setupBuf->wIndexL == 0x04) {
+          len = WCID_FEATURE_DESCR[0];
+          ptr = WCID_FEATURE_DESCR;
         }
-        return 0xff;
-      #endif
+        break;
+#endif // WCID_VENDOR_CODE
 
       default:
-        return 0xFF;                        // command not supported
+        break;                        // command not supported
     }
   }
-  else return 0xFF;
+
+  if (len != 0xFF) {
+      for (i = 0; i < len; i++)
+          EP0_buffer[i] = ptr[i];
+  }
 }
 
 // Setup endpoints
