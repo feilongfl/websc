@@ -1,0 +1,3 @@
+[submodule "tools/erpc"]
+	path = tools/erpc
+	url = https://github.com/EmbeddedRPC/erpc.git
