@@ -11,6 +11,7 @@
 SKETCH     = vendor_bridge.c
 TARGET     = vendor_bridge
 INCLUDE    = include
+ERPC    = ../../../erpc
 
 # Microcontroller Settings
 FREQ_SYS   = 16000000
@@ -28,7 +29,9 @@ WCHISP    ?= python3 tools/chprog.py
 CFLAGS  = -mmcs51 --model-small --no-xinit-opt
 CFLAGS += --xram-size $(XRAM_SIZE) --xram-loc $(XRAM_LOC) --code-size $(CODE_SIZE)
 CFLAGS += -I$(INCLUDE) -DFREQ_SYS=$(FREQ_SYS)
+CFLAGS += -I$(ERPC)
 CFILES  = $(SKETCH) $(wildcard $(INCLUDE)/*.c)
+CFILES += $(wildcard $(ERPC)/*.c)
 RFILES  = $(CFILES:.c=.rel)
 CLEAN   = rm -f *.ihx *.lk *.map *.mem *.lst *.rel *.rst *.sym *.asm *.adb
 
