@@ -21,7 +21,7 @@
 #define MANUFACTURER_STR    'F','e','i','L','o','n','g'
 #define PRODUCT_STR         'U','S','B','2','X'
 #define SERIAL_STR          'C','H','5','5','2'
-#define INTERFACE_STR       'V','e','n','d','o','r',' ','B','u','l','k'
+#define INTERFACE_STR       'u','s','b','2','x','|','w','c','h',',','w','c','h','5','5','2','e','_','d','e','m','o'
 #define WEBUSB_URL          "github.com/feilongfl"
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! EXPERIMENTAL !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

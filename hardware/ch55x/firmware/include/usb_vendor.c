@@ -66,11 +66,11 @@ uint8_t VEN_read(void) {
 // VENDOR-Specific USB Handler Functions
 // ===================================================================================
 // Handle vendor-specific non-standard control requests
+uint8_t usb_custom(uint8_t * ptr);
 uint8_t VEN_control(void) {
   uint8_t i;
   uint8_t* ptr = 0;
   uint8_t len = 0xFF;
-  uint8_t* usb_vendor_webusb_ptr = (uint8_t*)&usb_vendor_webusb;
 
   if((USB_setupBuf->bRequestType & USB_REQ_TYP_MASK) == USB_REQ_TYP_VENDOR) {
     switch(USB_setupBuf->bRequest) {
@@ -99,7 +99,8 @@ uint8_t VEN_control(void) {
         break;
 
       default:
-        break;                        // command not supported
+        len = usb_custom(ptr);
+        break;
     }
   }
 

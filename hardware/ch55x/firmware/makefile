@@ -23,6 +23,7 @@ CC         = sdcc
 OBJCOPY    = objcopy
 PACK_HEX   = packihx
 WCHISP    ?= python3 tools/chprog.py
+WCHUSB2X  ?= python3 tools/usb2x.py
 
 # Compiler Flags
 CFLAGS  = -mmcs51 --model-small --no-xinit-opt
@@ -57,6 +58,11 @@ $(TARGET).bin: $(TARGET).ihx
 	@echo "Building $(TARGET).bin ..."
 	@$(OBJCOPY) -I ihex -O binary $(TARGET).ihx $(TARGET).bin
 	
+bootloader:
+	@echo "Reboot CH55x to bootloader..."
+	@$(WCHUSB2X) reboot_loader
+	@sleep 1
+
 flash: $(TARGET).bin size removetemp
 	@echo "Uploading to CH55x ..."
 	@$(WCHISP) $(TARGET).bin
@@ -69,7 +75,7 @@ bin: $(TARGET).bin size removetemp
 
 bin-hex: $(TARGET).bin $(TARGET).hex size removetemp
 
-install: flash
+install: bootloader flash
 
 size:
 	@echo "------------------"

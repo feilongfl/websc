@@ -13,6 +13,14 @@ void VEN_init(void);                                // setup USB vendor-specific
 #define VEN_REQ_MS2_DESC    2                       // Microsoft OS 2.0 platform capability descriptor
 #define VEN_REQ_MS1_DESC    3                       // Microsoft OS 1.0 platform capability descriptor
 
+#define VEN_REQ_BOOTLOADER   0xF0
+
+#define VEN_REQ_INT_GET   0x10
+
+#define VEN_REQ_SEEK   0x20
+#define VEN_REQ_BYTE_WRITE   0x21
+#define VEN_REQ_BYTE_READ   0x22
+
 // Bulk data transfer functions
 #define VEN_available()   (VEN_EP1_readByteCount)   // number of received bytes
 #define VEN_ready()       (!VEN_EP1_writeBusyFlag)  // check if ready to write

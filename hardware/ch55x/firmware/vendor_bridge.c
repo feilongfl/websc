@@ -87,26 +87,29 @@ void main(void) {
   CLK_config();                                 // configure system clock
   DLY_ms(5);                                    // wait for clock to stabilize
   VEN_init();                                   // init USB vendor-specific device
-  I2C_init();                                   // init I2C
-  PWM_set_freq(2000);                           // set buzzer tone frequency
-  PWM_write(PIN_BUZZER, 127);                   // set buzzer duty cycle 50%
+  // I2C_init();                                   // init I2C
+  // PWM_set_freq(2000);                           // set buzzer tone frequency
+  // PWM_write(PIN_BUZZER, 127);                   // set buzzer duty cycle 50%
 
   // Loop
   while(1) {
-    if(VEN_BOOT_flag)   BOOT_now();             // enter bootloader?
-    if(VEN_BUZZER_flag) PWM_start(PIN_BUZZER);  // buzzer start?
-    else {                                      // buzzer stop?
-      PWM_stop(PIN_BUZZER);
-      PIN_high(PIN_BUZZER);
+    if(VEN_BOOT_flag) {
+      DLY_ms(100);            // wait for usb communite
+      BOOT_now();             // enter bootloader?
     }
+    // if(VEN_BUZZER_flag) PWM_start(PIN_BUZZER);  // buzzer start?
+    // else {                                      // buzzer stop?
+    //   PWM_stop(PIN_BUZZER);
+    //   PIN_high(PIN_BUZZER);
+    // }
 
-    if(VEN_I2C_flag) {                          // I2C start?
-      I2C_start();                              // set I2C start condition
-      while(VEN_I2C_flag) {                     // repeat for all incoming bytes
-        while(VEN_available())                  // incoming bulk data?
-          I2C_write(VEN_read());                // write received data byte via I2C
-      }
-      I2C_stop();                               // set I2C stop condition
-    }
+    // if(VEN_I2C_flag) {                          // I2C start?
+    //   I2C_start();                              // set I2C start condition
+    //   while(VEN_I2C_flag) {                     // repeat for all incoming bytes
+    //     while(VEN_available())                  // incoming bulk data?
+    //       I2C_write(VEN_read());                // write received data byte via I2C
+    //   }
+    //   I2C_stop();                               // set I2C stop condition
+    // }
   }
 }
