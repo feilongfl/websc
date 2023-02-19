@@ -1,6 +1,5 @@
+#!/usr/bin/env python3
 
-import sys
-import time
 import usb.core
 import fire
 
@@ -39,10 +38,31 @@ class CH55xDevice():
     def sendcontrol(self, ctrl):
         return self.dev.ctrl_transfer(VEN_REQ_WRITE, ctrl, 0, 0)
 
-    # def seek(self, addr):
-    #     addrH = addr >> 16
-    #     addrL = addr & 0xffff
-    #     return self.dev.ctrl_transfer(VEN_REQ_READ, VEN_REQ_DMA_READ, addrL, addrH, READ_BUF_MAX)
+    def check_interrupt(self):
+        ret = self.dev.ctrl_transfer(
+            VEN_REQ_READ, VEN_REQ_INT_GET, 0, 0, READ_BUF_MAX)
+        interrupt = ret[0] << 8 | ret[1]
+        return interrupt
+
+    def read_byte(self, addr: int, length=1, typeofaddr=0):
+        # USB2X_ADDRTYPE_code = 0x1
+        # USB2X_ADDRTYPE_idata = 0x2
+        # USB2X_ADDRTYPE_xdata = 0x4
+        # USB2X_ADDRTYPE_data = 0x8
+        # USB2X_ADDRTYPE_sfr = 0x10
+
+        ret = self.dev.ctrl_transfer(
+            VEN_REQ_READ, VEN_REQ_BYTE_READ, addr, 1 << (typeofaddr+8), length)
+        return ','.join({hex(v) for v in ret})
+
+    def write_byte(self, addr: int, data: int, typeofaddr=0):
+        # USB2X_ADDRTYPE_code = 0x1
+        # USB2X_ADDRTYPE_idata = 0x2
+        # USB2X_ADDRTYPE_xdata = 0x4
+        # USB2X_ADDRTYPE_data = 0x8
+
+        self.dev.ctrl_transfer(
+            VEN_REQ_WRITE, VEN_REQ_BYTE_WRITE, addr, 1 << (typeofaddr+8) | data)
 
     def reboot_loader(self):
         self.dev.ctrl_transfer(VEN_REQ_WRITE, VEN_REQ_BOOTLOADER, 0, 0)
@@ -53,9 +73,11 @@ class CH55xDevice():
         self.dev.ctrl_transfer(VEN_REQ_WRITE, VEN_REQ_SEEK, addrL, addrH)
 
     def read(self, length=1):
-        self.dev.read(BULK_EP_OUT, READ_BUF_MAX)
+        self.dev.read(BULK_EP_IN, length)
+
+    def write(self, data):
+        self.dev.write(BULK_EP_OUT, data)
 
 
 if __name__ == "__main__":
-    # _main()
     fire.Fire(CH55xDevice)

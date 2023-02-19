@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.json": "jsonc",
+        "*.asm": "platformio-debug.asm",
+        "*.h": "c",
+        "*.inc": "c",
+        "*.c": "c",
+    },
+    "files.watcherExclude": {
+        "**/target": true
+    }
+}

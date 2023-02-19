@@ -99,12 +99,13 @@ uint8_t VEN_control(void) {
         break;
 
       default:
+        ptr = EP0_buffer;
         len = usb_custom(ptr);
         break;
     }
   }
 
-  if (len != 0xFF && ptr != 0) {
+  if (len != 0xFF && ptr != 0 && ptr != EP0_buffer) {
       for (i = 0; i < len; i++)
           EP0_buffer[i] = ptr[i];
   }
