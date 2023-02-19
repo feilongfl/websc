@@ -25,6 +25,12 @@ READ_BUF_MAX = 0xFF
 
 
 class CH55xDevice():
+    USB2X_ADDRTYPE_code = 0
+    USB2X_ADDRTYPE_data = 1
+    USB2X_ADDRTYPE_idata = 2
+    USB2X_ADDRTYPE_xdata = 3
+    USB2X_ADDRTYPE_sfr = 4
+
     def __init__(self):
         self.dev = usb.core.find(idVendor=VENDOR_ID, idProduct=PRODUCT_ID)
         if self.dev is None:
@@ -44,18 +50,14 @@ class CH55xDevice():
         interrupt = ret[0] << 8 | ret[1]
         return interrupt
 
-    # define USB2X_ADDRTYPE_code  0
-    # define USB2X_ADDRTYPE_data  1
-    # define USB2X_ADDRTYPE_idata 2
-    # define USB2X_ADDRTYPE_xdata 3
-    # define USB2X_ADDRTYPE_sfr   4
     # index=address, value=data to write
     def read_byte(self, addr: int, length=1, typeofaddr=0):
         if typeofaddr == 4:
             length = 2
         ret = self.dev.ctrl_transfer(
             VEN_REQ_READ, VEN_REQ_READ_top + typeofaddr, 0, addr, length)
-        return ','.join({hex(v) for v in ret})
+        # return ','.join({hex(v) for v in ret})
+        return ret
 
     def write_byte(self, addr: int, data: int, typeofaddr=0):
         self.dev.ctrl_transfer(
