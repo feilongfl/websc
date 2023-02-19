@@ -70,7 +70,7 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_BYTE_WRITE)(uint8_t *ptr)
 #define SFRDefine(addr, ...) __sfr __at(addr) UTIL_CAT(_sfr_, addr)
 SFR_LISTIFY(SFRDefine, (;));
 
-static uint8_t SFRread(uint16_t sfr)
+static uint16_t SFRread(uint16_t sfr)
 {
 	switch (sfr) {
 #define SFRreadCase(addr, ...)                                                                     \
@@ -91,6 +91,7 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_BYTE_READ)(uint8_t *ptr)
 	uint16_t length = USB_setupBuf->wLengthH << 8 | USB_setupBuf->wLengthL;
 	if (length > EP0_BUF_SIZE)
 		length = EP0_BUF_SIZE;
+	uint16_t temp = 0;
 
 	addr.type = USB_setupBuf->wIndexH << 8 | USB_setupBuf->wIndexL;
 	addr.address = USB_setupBuf->wValueH << 8 | USB_setupBuf->wValueL;
@@ -113,7 +114,10 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_BYTE_READ)(uint8_t *ptr)
 		break;
 
 	case USB2X_ADDRTYPE_sfr:
-		ptr[0] = SFRread(addr.address);
+		temp = SFRread(addr.address);
+		ptr[0] = temp >> 8;
+		ptr[1] = temp & 0xff;
+		length = 2;
 		break;
 
 	default:
