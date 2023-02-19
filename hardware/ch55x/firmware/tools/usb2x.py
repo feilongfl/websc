@@ -61,6 +61,11 @@ class CH55xDevice():
         self.dev.ctrl_transfer(
             VEN_REQ_WRITE, VEN_REQ_WRITE_top + typeofaddr, data, addr)
 
+    def test(self):
+        while True:
+            self.write_byte(0x90, 0xef, typeofaddr=4)
+            self.write_byte(0x90, 0xff, typeofaddr=4)
+
     def reboot_loader(self):
         self.dev.ctrl_transfer(VEN_REQ_WRITE, VEN_REQ_BOOTLOADER, 0, 0)
 
