@@ -54,7 +54,7 @@ class CH552:
     def __init__(self):
         self.dev = CH55xDevice()
         self.regs = {
-            sfr: USB2XRegisters(self.dev, CH55xDevice.USB2X_ADDRTYPE_sfr),
+            "sfr": USB2XRegisters(self.dev, CH55xDevice.USB2X_ADDRTYPE_sfr),
         }
 
 
