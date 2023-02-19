@@ -5,22 +5,29 @@
 // #define BIT(n) (1 << (n))
 #define ARG_UNUSED(x) (void)(x)
 
-#define USB2X_ADDRTYPE_code  BIT(0)
-#define USB2X_ADDRTYPE_idata BIT(1)
-#define USB2X_ADDRTYPE_xdata BIT(2)
-#define USB2X_ADDRTYPE_data  BIT(3)
-#define USB2X_ADDRTYPE_sfr   BIT(4)
+#define USB2X_ADDRTYPE_code  0
+#define USB2X_ADDRTYPE_data  1
+#define USB2X_ADDRTYPE_idata 2
+#define USB2X_ADDRTYPE_xdata 3
+#define USB2X_ADDRTYPE_sfr   4
 
 #define _VEN_PROCESS_NAME(name) ven_process_##name
 #define VEN_PROCESS_NAME(name)	_VEN_PROCESS_NAME(name)
-#define VEN_PROCESS(name)                                                                          \
-	case name:                                                                                 \
-		len = VEN_PROCESS_NAME(name)(ptr);                                                 \
+#define VEN_PROCESS(req, func)                                                                     \
+	case req:                                                                                  \
+		len = VEN_PROCESS_NAME(func)(ptr, req);                                            \
 		break // no ;
 
 #define USB2X_ADDRTYPE_WRITE(area)                                                                 \
 	case USB2X_ADDRTYPE_##area:                                                                \
-		*(unsigned char __##area *)addr.address = addr.type & 0xff;                        \
+		*(unsigned char __##area *)address = value & 0xff;                                 \
+		break // no;
+
+#define USB2X_ADDRTYPE_READ(area)                                                                  \
+	case USB2X_ADDRTYPE_##area:                                                                \
+		for (uint8_t i = 0; i < length; i++) {                                             \
+			ptr[i] = *((unsigned char __##area *)address + i);                           \
+		}                                                                                  \
 		break // no;
 
 #define USB2X_ISR(irq)                                                                             \

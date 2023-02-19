@@ -15,8 +15,8 @@ BULK_EP_IN = 0x80 | BULK_EP_OUT
 VEN_REQ_BOOTLOADER = 0xF0
 VEN_REQ_INT_GET = 0x10
 VEN_REQ_SEEK = 0x20
-VEN_REQ_BYTE_WRITE = 0x21
-VEN_REQ_BYTE_READ = 0x22
+VEN_REQ_WRITE_top = 0x30
+VEN_REQ_READ_top = 0x40
 
 VEN_REQ_WRITE = 0x40      # (bRequestType): vendor host to device
 VEN_REQ_READ = 0xC0      # (bRequestType): vendor device to host
@@ -44,25 +44,22 @@ class CH55xDevice():
         interrupt = ret[0] << 8 | ret[1]
         return interrupt
 
+    # define USB2X_ADDRTYPE_code  0
+    # define USB2X_ADDRTYPE_data  1
+    # define USB2X_ADDRTYPE_idata 2
+    # define USB2X_ADDRTYPE_xdata 3
+    # define USB2X_ADDRTYPE_sfr   4
+    # index=address, value=data to write
     def read_byte(self, addr: int, length=1, typeofaddr=0):
-        # USB2X_ADDRTYPE_code = 0x1
-        # USB2X_ADDRTYPE_idata = 0x2
-        # USB2X_ADDRTYPE_xdata = 0x4
-        # USB2X_ADDRTYPE_data = 0x8
-        # USB2X_ADDRTYPE_sfr = 0x10
-
+        if typeofaddr == 4:
+            length = 2
         ret = self.dev.ctrl_transfer(
-            VEN_REQ_READ, VEN_REQ_BYTE_READ, addr, 1 << (typeofaddr+8), length)
+            VEN_REQ_READ, VEN_REQ_READ_top + typeofaddr, 0, addr, length)
         return ','.join({hex(v) for v in ret})
 
     def write_byte(self, addr: int, data: int, typeofaddr=0):
-        # USB2X_ADDRTYPE_code = 0x1
-        # USB2X_ADDRTYPE_idata = 0x2
-        # USB2X_ADDRTYPE_xdata = 0x4
-        # USB2X_ADDRTYPE_data = 0x8
-
         self.dev.ctrl_transfer(
-            VEN_REQ_WRITE, VEN_REQ_BYTE_WRITE, addr, 1 << (typeofaddr+8) | data)
+            VEN_REQ_WRITE, VEN_REQ_WRITE_top + typeofaddr, data, addr)
 
     def reboot_loader(self):
         self.dev.ctrl_transfer(VEN_REQ_WRITE, VEN_REQ_BOOTLOADER, 0, 0)
