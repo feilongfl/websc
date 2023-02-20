@@ -10,18 +10,18 @@
 //
 // Description:
 // ------------
-// This code implements a simple USB vendor class to I2C bridge. The start and 
-// stop condition on the I2C bus is set according to an appropriate vendor class 
-// control request. Data received via USB bulk transfer is passed directly to the 
+// This code implements a simple USB vendor class to I2C bridge. The start and
+// stop condition on the I2C bus is set according to an appropriate vendor class
+// control request. Data received via USB bulk transfer is passed directly to the
 // slave device via I2C.
-// Vendor control requests can also be used to control the buzzer or put the 
+// Vendor control requests can also be used to control the buzzer or put the
 // microcontroller into boot mode.
-// This firmware also includes an experimental implementation of a Windows 
-// Compatible ID (WCID). This allows to use the device without manual driver 
-// installation on Windows system. However, since I (un)fortunately do not have a 
-// Windows system, this function is untested. This feature can be switched on or 
-// off in the configuration file (config.h). If not used, a manual installation of 
-// the libusb-win32 driver via the Zadig tool (https://zadig.akeo.ie/) is required 
+// This firmware also includes an experimental implementation of a Windows
+// Compatible ID (WCID). This allows to use the device without manual driver
+// installation on Windows system. However, since I (un)fortunately do not have a
+// Windows system, this function is untested. This feature can be switched on or
+// off in the configuration file (config.h). If not used, a manual installation of
+// the libusb-win32 driver via the Zadig tool (https://zadig.akeo.ie/) is required
 // on Windows systems.
 //
 // References:
@@ -55,7 +55,7 @@
 //
 // Operating Instructions:
 // -----------------------
-// - Connect the board via USB to your PC. It should be detected as a vendor class 
+// - Connect the board via USB to your PC. It should be detected as a vendor class
 //   device.
 // - Run 'python3 vendor-bridge-demo.py' or 'python3 vendor-bridge-conway.py'.
 
@@ -78,6 +78,7 @@
 
 void main(void) {
   // Setup
+  P1_DIR_PU = 0;                                // disable pull-up register(5v is too high for low power device)
   CLK_config();                                 // configure system clock
   DLY_ms(5);                                    // wait for clock to stabilize
   VEN_init();                                   // init USB vendor-specific device
