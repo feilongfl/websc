@@ -144,20 +144,23 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_READ)(uint8_t *ptr, uint8_t par)
 
 // | cmd | parameter |
 // | ... |   .....   |
-#define USB_CUSTOM_IIC_COMMAND_RESET (0x0 << 5)
-#define USB_CUSTOM_IIC_COMMAND_DELAY (0x1 << 5) // par: time_100us x n
-#define USB_CUSTOM_IIC_COMMAND_START (0x2 << 5)
-#define USB_CUSTOM_IIC_COMMAND_STOP  (0x3 << 5)
-#define USB_CUSTOM_IIC_COMMAND_READ  (0x4 << 5)
-#define USB_CUSTOM_IIC_COMMAND_WRITE (0x5 << 5)
-#define USB_CUSTOM_IIC_COMMAND_Trig  (0x6 << 5)
-#define USB_CUSTOM_IIC_COMMAND_CHECK (0x7 << 5)
+#define USB_CUSTOM_IIC_COMMAND_RESET   (0x0 << 5)
+#define USB_CUSTOM_IIC_COMMAND_DELAY   (0x1 << 5) // par: time_100us x n
+#define USB_CUSTOM_IIC_COMMAND_START   (0x2 << 5)
+#define USB_CUSTOM_IIC_COMMAND_STOP    (0x3 << 5)
+#define USB_CUSTOM_IIC_COMMAND_READ    (0x4 << 5)
+#define USB_CUSTOM_IIC_COMMAND_WRITE   (0x5 << 5)
+#define USB_CUSTOM_IIC_COMMAND_Trig    (0x6 << 5)
+#define USB_CUSTOM_IIC_COMMAND_CHECK   (0x7 << 5)
+#define USB_CUSTOM_IIC_COMMAND_MASKCMD (0x7 << 5)
+#define USB_CUSTOM_IIC_COMMAND_MASKPAR ((1 << 5) - 1)
 
 struct usb_custom_iic {
 	uint8_t point;
 	uint8_t data[32];
 	uint32_t flag; // 0 = data, 1 = flags
 };
+__xdata static struct usb_custom_iic iic;
 
 static void usb_custom_iic_set(struct usb_custom_iic *iic, uint8_t flag, uint8_t val)
 {
@@ -174,7 +177,6 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
 {
 	uint16_t command;
 	uint8_t i;
-	__xdata static struct usb_custom_iic iic;
 	uint8_t *iic_ptr;
 	ARG_UNUSED(par);
 
@@ -213,10 +215,63 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
 	return 0;
 }
 
+void usb_custom_iic_polling_delay(uint8_t par)
+{
+	ARG_UNUSED(par);
+}
+
+void usb_custom_iic_polling_start(uint8_t par)
+{
+	ARG_UNUSED(par);
+}
+
+void usb_custom_iic_polling_stop(uint8_t par)
+{
+	ARG_UNUSED(par);
+}
+
+void usb_custom_iic_polling_read(uint8_t data)
+{
+	ARG_UNUSED(data);
+}
+
+void usb_custom_iic_polling_write(uint8_t data)
+{
+	ARG_UNUSED(data);
+}
+
+void(iicfunc[])(uint8_t) = {
+	0,
+	usb_custom_iic_polling_delay,
+	usb_custom_iic_polling_start,
+	usb_custom_iic_polling_stop,
+	usb_custom_iic_polling_read,
+	usb_custom_iic_polling_write,
+	0,
+	0,
+};
+
 void usb_custom_iic_polling()
 {
+	uint8_t ptr;
+	uint8_t cmdpar;
+	void (*func)(uint8_t);
+
 	if (!usb2x_iic) {
 		return;
+	}
+
+	for (ptr = 0; ptr < iic.point; ptr++) {
+		if (iic.flag & (1 << ptr) == USB_CUSTOM_IIC_FLAG_COMMAND) {
+			cmdpar = USB_CUSTOM_IIC_COMMAND_MASKPAR & iic.data[ptr];
+
+			func = iicfunc[iic.data[ptr] >> 5];
+			if (func)
+				func(ptr);
+		} else {
+			// write data
+			usb_custom_iic_polling_write(iic.data[ptr]);
+		}
 	}
 
 	usb2x_iic = 0;
