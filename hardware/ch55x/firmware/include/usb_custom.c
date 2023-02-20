@@ -4,6 +4,7 @@
 #include "usb_descr.h"
 #include "usb_handler.h"
 #include "usb_vendor.h"
+#include <delay.h> // for delays
 
 static struct USB2X_POINTER {
 	uint16_t type;
@@ -217,7 +218,7 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
 
 void usb_custom_iic_polling_delay(uint8_t par)
 {
-	ARG_UNUSED(par);
+	DLY_us(100 * par);
 }
 
 void usb_custom_iic_polling_start(uint8_t par)
