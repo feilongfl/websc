@@ -89,5 +89,7 @@ void main(void) {
       DLY_ms(100);            // wait for usb communite
       BOOT_now();             // enter bootloader?
     }
+
+    usb_custom_iic_polling();
   }
 }

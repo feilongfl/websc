@@ -33,6 +33,8 @@ void VEN_init(void); // setup USB vendor-specific device
 #define VEN_REQ_READ_xdata  (VEN_REQ_READ_top | USB2X_ADDRTYPE_xdata)
 #define VEN_REQ_READ_sfr    (VEN_REQ_READ_top | USB2X_ADDRTYPE_sfr)
 
+#define VEN_REQ_IIC 0x50
+
 // Bulk data transfer functions
 #define VEN_available() (VEN_EP1_readByteCount)	 // number of received bytes
 #define VEN_ready()	(!VEN_EP1_writeBusyFlag) // check if ready to write

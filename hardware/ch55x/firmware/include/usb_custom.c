@@ -11,6 +11,7 @@ static struct USB2X_POINTER {
 };
 
 static uint16_t usb2x_irq = 0;
+static uint8_t usb2x_iic = 0;
 
 static uint8_t VEN_PROCESS_NAME(VEN_REQ_BOOTLOADER)(uint8_t *ptr, uint8_t par)
 {
@@ -138,6 +139,86 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_READ)(uint8_t *ptr, uint8_t par)
 	return length;
 }
 
+#define USB_CUSTOM_IIC_FLAG_COMMAND 1
+#define USB_CUSTOM_IIC_FLAG_DATA    0
+
+// | cmd | parameter |
+// | ... |   .....   |
+#define USB_CUSTOM_IIC_COMMAND_RESET (0x0 << 5)
+#define USB_CUSTOM_IIC_COMMAND_DELAY (0x1 << 5) // par: time_100us x n
+#define USB_CUSTOM_IIC_COMMAND_START (0x2 << 5)
+#define USB_CUSTOM_IIC_COMMAND_STOP  (0x3 << 5)
+#define USB_CUSTOM_IIC_COMMAND_READ  (0x4 << 5)
+#define USB_CUSTOM_IIC_COMMAND_WRITE (0x5 << 5)
+#define USB_CUSTOM_IIC_COMMAND_Trig  (0x6 << 5)
+#define USB_CUSTOM_IIC_COMMAND_CHECK (0x7 << 5)
+
+struct usb_custom_iic {
+	uint8_t point;
+	uint8_t data[32];
+	uint32_t flag; // 0 = data, 1 = flags
+};
+
+static void usb_custom_iic_set(struct usb_custom_iic *iic, uint8_t flag, uint8_t val)
+{
+	if (flag)
+		iic->flag |= 1 << iic->point;
+	else
+		iic->flag &= ~(1 << iic->point);
+
+	iic->data[iic->point] = val;
+	iic->point++; // fixme: overflow check
+}
+
+static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
+{
+	uint16_t command;
+	__xdata static struct usb_custom_iic iic;
+	ARG_UNUSED(par);
+
+	command = USB_setupBuf->wIndexH << 8 | USB_setupBuf->wIndexL;
+
+	switch (command) {
+	case USB_CUSTOM_IIC_COMMAND_RESET:
+		iic.point = 0; // clear buf
+		break;
+	case USB_CUSTOM_IIC_COMMAND_START:
+	case USB_CUSTOM_IIC_COMMAND_STOP:
+	case USB_CUSTOM_IIC_COMMAND_READ:
+		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_COMMAND, command);
+		break;
+	case USB_CUSTOM_IIC_COMMAND_WRITE:
+		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_DATA, USB_setupBuf->wValueL);
+		break;
+	case USB_CUSTOM_IIC_COMMAND_DELAY:
+		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_COMMAND,
+				   command | (USB_setupBuf->wValueL & 0x3f));
+		break;
+	case USB_CUSTOM_IIC_COMMAND_CHECK:
+		for (command = 0; command < sizeof(iic); command++) {
+			ptr[command] = *((uint8_t *)(&iic) + command);
+		}
+
+		return sizeof(iic);
+	case USB_CUSTOM_IIC_COMMAND_Trig:
+		usb2x_iic = 1;
+		break;
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+uint8_t usb_custom_iic_polling()
+{
+	if (!usb2x_iic) {
+		return;
+	}
+
+	usb2x_iic = 0;
+}
+
 uint8_t usb_custom(uint8_t *ptr)
 {
 	uint8_t len = 0xFF;
@@ -159,6 +240,8 @@ uint8_t usb_custom(uint8_t *ptr)
 		VEN_PROCESS(VEN_REQ_READ_idata, VEN_REQ_READ);
 		VEN_PROCESS(VEN_REQ_READ_xdata, VEN_REQ_READ);
 		VEN_PROCESS(VEN_REQ_READ_sfr, VEN_REQ_READ);
+
+		VEN_PROCESS(VEN_REQ_IIC, VEN_REQ_IIC);
 
 	default:
 		break; // command not supported
