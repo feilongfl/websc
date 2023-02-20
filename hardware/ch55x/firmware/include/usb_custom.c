@@ -173,7 +173,9 @@ static void usb_custom_iic_set(struct usb_custom_iic *iic, uint8_t flag, uint8_t
 static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
 {
 	uint16_t command;
+	uint8_t i;
 	__xdata static struct usb_custom_iic iic;
+	uint8_t *iic_ptr;
 	ARG_UNUSED(par);
 
 	command = USB_setupBuf->wIndexH << 8 | USB_setupBuf->wIndexL;
@@ -185,18 +187,19 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
 	case USB_CUSTOM_IIC_COMMAND_START:
 	case USB_CUSTOM_IIC_COMMAND_STOP:
 	case USB_CUSTOM_IIC_COMMAND_READ:
-		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_COMMAND, command);
-		break;
-	case USB_CUSTOM_IIC_COMMAND_WRITE:
-		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_DATA, USB_setupBuf->wValueL);
-		break;
 	case USB_CUSTOM_IIC_COMMAND_DELAY:
 		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_COMMAND,
 				   command | (USB_setupBuf->wValueL & 0x3f));
 		break;
+
+	case USB_CUSTOM_IIC_COMMAND_WRITE:
+		usb_custom_iic_set(&iic, USB_CUSTOM_IIC_FLAG_DATA, USB_setupBuf->wValueL);
+		break;
+
 	case USB_CUSTOM_IIC_COMMAND_CHECK:
-		for (command = 0; command < sizeof(iic); command++) {
-			ptr[command] = *((uint8_t *)(&iic) + command);
+		iic_ptr = (uint8_t *)(&iic);
+		for (i = 0; i < sizeof(iic); i++) {
+			ptr[i] = iic_ptr[i];
 		}
 
 		return sizeof(iic);
@@ -210,7 +213,7 @@ static uint8_t VEN_PROCESS_NAME(VEN_REQ_IIC)(uint8_t *ptr, uint8_t par)
 	return 0;
 }
 
-uint8_t usb_custom_iic_polling()
+void usb_custom_iic_polling()
 {
 	if (!usb2x_iic) {
 		return;

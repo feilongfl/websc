@@ -75,6 +75,49 @@ class USB2XPin():
         return str(self.pinid)
 
 
+class USB2XIIC():
+    USB_CUSTOM_IIC_COMMAND_RESET = (0x0 << 5)
+    USB_CUSTOM_IIC_COMMAND_DELAY = (0x1 << 5)
+    USB_CUSTOM_IIC_COMMAND_START = (0x2 << 5)
+    USB_CUSTOM_IIC_COMMAND_STOP = (0x3 << 5)
+    USB_CUSTOM_IIC_COMMAND_READ = (0x4 << 5)
+    USB_CUSTOM_IIC_COMMAND_WRITE = (0x5 << 5)
+    USB_CUSTOM_IIC_COMMAND_Trig = (0x6 << 5)
+    USB_CUSTOM_IIC_COMMAND_CHECK = (0x7 << 5)
+
+    def __init__(self, dev: CH55xDevice) -> None:
+        self.dev = dev
+
+    # command <<=
+    def __ilshift__(self, other):
+        match other:
+            case 'reset' | 'clear' | 'c':  # clear buffer before send
+                self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_RESET, 0)
+            case 'start' | 'st' | 's':
+                self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_START, 0)
+            case 'stop' | 'sp' | 'x':
+                self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_STOP, 0)
+            case int():  # delay_100us
+                # case 'delay', 'd':
+                self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_DELAY, other)
+            case 'trig' | 't':
+                self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_Trig, 0)
+            case 'read' | 'r':
+                self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_Trig, 1)
+            case _:
+                log.critical(f'Method "{other}" Not Support')
+
+        return self
+
+    # data write <=
+    def __le__(self, other):
+        self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_WRITE, other)
+
+    # data read >= count
+    def __ge__(self, other):
+        self.dev.iic_set(USB2XIIC.USB_CUSTOM_IIC_COMMAND_READ, other)
+
+
 class USB2XPinList(dict):
     def __init__(self, reg: dict, pinList: list):
         self.reg = reg
@@ -142,6 +185,31 @@ class CH552E(CH55x):
             # usb port can't use
         ])
 
+        self.iic = USB2XIIC(self.dev)
+
+
+class IIC_TEST(CH552E):
+    def test(self):
+        self.iic <<= 'c'
+
+        self.iic <<= 's'
+        self.iic <= 0x58
+        self.iic <= 0x18
+        self.iic <= 0x55
+        self.iic <<= 0x1
+
+        self.iic <<= 's'
+        self.iic <<= 'r'
+        self.iic <<= 'r'
+        self.iic <<= 'r'
+        self.iic <<= 'x'
+
+        self.dev.iic_check()
+
+    def trig(self):
+        self.iic <<= 't'
+        self.dev.iic_check()
+
 
 if __name__ == "__main__":
-    fire.Fire(CH552E)
+    fire.Fire(IIC_TEST)

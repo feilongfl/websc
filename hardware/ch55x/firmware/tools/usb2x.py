@@ -21,6 +21,8 @@ VEN_REQ_READ_top = 0x40
 VEN_REQ_WRITE = 0x40      # (bRequestType): vendor host to device
 VEN_REQ_READ = 0xC0      # (bRequestType): vendor device to host
 
+VEN_REQ_IIC = 0x50
+
 READ_BUF_MAX = 0xFF
 
 
@@ -70,6 +72,15 @@ class CH55xDevice():
 
     def reboot_loader(self):
         self.dev.ctrl_transfer(VEN_REQ_WRITE, VEN_REQ_BOOTLOADER, 0, 0)
+
+    def iic_set(self, index, data):
+        self.dev.ctrl_transfer(VEN_REQ_WRITE, VEN_REQ_IIC, data, index)
+
+    def iic_check(self):
+        ret = self.dev.ctrl_transfer(
+            VEN_REQ_READ, VEN_REQ_IIC, 0, 0xe0, READ_BUF_MAX)
+        print(ret)
+        # return ret
 
     def seek(self, addr=0):
         addrH = addr >> 16
